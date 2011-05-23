@@ -51,7 +51,7 @@ has states  => (
 
 use constant IDX_LEN    => length(pack('N*', 1 .. 2));
 
-our $VERSION = '0.1';
+our $VERSION = '0.2';
 
 
 sub BUILD {
@@ -167,7 +167,7 @@ Geo::CEP - Resolve Brazilian city data for a given CEP
 
 =head1 VERSION
 
-version 0.1
+version 0.2
 
 =head1 SYNOPSIS
 
@@ -231,6 +231,8 @@ Retorna I<0> quando não foi possível encontrar.
 
 Retorna I<HashRef> com os dados de todas as cidades.
 
+=for test_synopsis my ($VAR1);
+
 =for Pod::Coverage BUILD
 DEMOLISH
 get_idx
@@ -239,6 +241,10 @@ bsearch
 =head1 SEE ALSO
 
 =over 4
+
+=item *
+
+L<cep2city>
 
 =item *
 

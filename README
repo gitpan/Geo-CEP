@@ -2,7 +2,7 @@ NAME
     Geo::CEP - Resolve Brazilian city data for a given CEP
 
 VERSION
-    version 0.1
+    version 0.2
 
 SYNOPSIS
         use Data::Dumper;
@@ -54,6 +54,8 @@ METHODS
     Retorna *HashRef* com os dados de todas as cidades.
 
 SEE ALSO
+    *   cep2city
+
     *   WWW::Correios::CEP
 
 AUTHOR

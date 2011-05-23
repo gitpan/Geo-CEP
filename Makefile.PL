@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-
+BEGIN { require 5.008; }
 
 use ExtUtils::MakeMaker 6.30;
 
@@ -19,16 +19,19 @@ my %WriteMakefileArgs = (
     'File::ShareDir::Install' => '0.03'
   },
   'DISTNAME' => 'Geo-CEP',
-  'EXE_FILES' => [],
+  'EXE_FILES' => [
+    'bin/cep2city'
+  ],
   'LICENSE' => 'perl',
   'NAME' => 'Geo::CEP',
   'PREREQ_PM' => {
     'File::ShareDir' => '0',
     'Moose' => '0',
+    'Pod::Usage' => '0',
     'Text::CSV' => '0',
     'common::sense' => '0'
   },
-  'VERSION' => '0.1',
+  'VERSION' => '0.2',
   'test' => {
     'TESTS' => 't/*.t'
   }

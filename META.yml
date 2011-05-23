@@ -16,6 +16,11 @@ name: Geo-CEP
 requires:
   File::ShareDir: 0
   Moose: 0
+  Pod::Usage: 0
   Text::CSV: 0
   common::sense: 0
-version: 0.1
+  perl: 5.008
+resources:
+  bugtracker: http://github.com/creaktive/Geo-CEP/issues
+  repository: git://github.com/creaktive/Geo-CEP.git
+version: 0.2
