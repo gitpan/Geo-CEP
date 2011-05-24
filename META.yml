@@ -21,6 +21,7 @@ requires:
   common::sense: 0
   perl: 5.008
 resources:
-  bugtracker: http://github.com/creaktive/Geo-CEP/issues
+  bugtracker: https://github.com/creaktive/Geo-CEP/issues
+  homepage: https://github.com/creaktive/Geo-CEP
   repository: git://github.com/creaktive/Geo-CEP.git
-version: 0.2
+version: 0.3
