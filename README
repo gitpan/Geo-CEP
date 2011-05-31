@@ -2,7 +2,7 @@ NAME
     Geo::CEP - Resolve Brazilian city data for a given CEP
 
 VERSION
-    version 0.3
+    version 0.4
 
 SYNOPSIS
         use Data::Dumper;

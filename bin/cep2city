@@ -7,10 +7,10 @@ eval 'exec /usr/bin/perl -S $0 ${1+"$@"}'   ## no critic
 
 
 use common::sense;
-use open ':locale';
+use open qw(:std :utf8);
 use strict;
 
-our $VERSION = '0.3'; # VERSION
+our $VERSION = '0.4'; # VERSION
 
 use Geo::CEP;
 use Pod::Usage;
@@ -44,7 +44,7 @@ cep2city - Returns city data for a given CEP
 
 =head1 VERSION
 
-version 0.3
+version 0.4
 
 =head1 SYNOPSIS
 

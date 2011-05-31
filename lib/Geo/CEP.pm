@@ -10,7 +10,7 @@ use File::ShareDir qw(dist_file);
 use Moose;
 use Text::CSV;
 
-our $VERSION = '0.3'; # VERSION
+our $VERSION = '0.4'; # VERSION
 
 has csv     => (is => 'ro', isa => 'Text::CSV', default => sub { new Text::CSV }, lazy => 1);
 has data    => (is => 'rw', isa => 'FileHandle');
@@ -166,7 +166,7 @@ Geo::CEP - Resolve Brazilian city data for a given CEP
 
 =head1 VERSION
 
-version 0.3
+version 0.4
 
 =head1 SYNOPSIS
 
@@ -232,7 +232,10 @@ Retorna I<HashRef> com os dados de todas as cidades.
 
 =for test_synopsis my ($VAR1);
 
-=for Pod::Coverage BUILD
+=for Pod::Coverage O_RDONLY
+SEEK_END
+SEEK_SET
+BUILD
 DEMOLISH
 get_idx
 bsearch

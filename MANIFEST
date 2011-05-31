@@ -13,6 +13,7 @@ share/cep.idx
 t/00-compile.t
 t/00-load.t
 t/01-scan.t
+t/02-bin.t
 t/author-critic.t
 t/release-cpan-changes.t
 t/release-dist-manifest.t
