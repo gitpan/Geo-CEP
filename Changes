@@ -1,5 +1,27 @@
-Changelog for Geo::CEP (full version at https://github.com/creaktive/Geo-CEP/commits/master/)
+Changelog for Geo-CEP
 
-0.4       2011-05-30
-0.2       2011-05-23
-0.1       2011-05-20
+0.5 2013-01-10T12:58:41
+ [Blabos de Blebe <blabos@blabos.org>]
+ - Itarana has no accents
+
+
+ [Stanislaw Pusep <creaktive@gmail.com>]
+ - references updated
+
+ - 90% code coverage
+
+ - s/Moose/Moo/g
+
+ - Dist::Zilla update
+
+ - Dist::Zilla: AutoPrereqs/MinimumPerl
+
+ - Changelog commit.
+
+
+ [Stanislaw Pusep <stas@sysd.org>]
+ - Merge pull request #1 from blabos/master
+   
+   Correção na acentuação de Itarana
+
+

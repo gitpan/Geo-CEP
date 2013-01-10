@@ -1,25 +1,32 @@
-#!/usr/bin/perl
 package Geo::CEP;
 # ABSTRACT: Resolve Brazilian city data for a given CEP
 
 
-use common::sense;
+use strict;
+use utf8;
+use warnings qw(all);
 
+use integer;
+
+use Carp qw(carp confess);
 use Fcntl qw(SEEK_END SEEK_SET O_RDONLY);
 use File::ShareDir qw(dist_file);
-use Moose;
+use Moo;
+use MooX::Types::MooseLike::Base qw(:all);
 use Text::CSV;
 
-our $VERSION = '0.4'; # VERSION
+our $VERSION = '0.5'; # VERSION
 
-has csv     => (is => 'ro', isa => 'Text::CSV', default => sub { new Text::CSV }, lazy => 1);
-has data    => (is => 'rw', isa => 'FileHandle');
-has index   => (is => 'rw', isa => 'FileHandle');
-has length  => (is => 'rw', isa => 'Int', default => 0);
-has offset  => (is => 'rw', isa => 'Int', default => 0);
+has csv     => (is => 'ro', isa => InstanceOf['Text::CSV'], default => sub { Text::CSV->new }, lazy => 1);
+has data    => (is => 'rw', isa => FileHandle);
+has index   => (is => 'rw', isa => FileHandle);
+has length  => (is => 'rw', isa => Int, default => sub { 0 });
+has offset  => (is => 'rw', isa => Int, default => sub { 0 });
+
+
 has states  => (
     is      => 'ro',
-    isa     => 'HashRef[Str]',
+    isa     => HashRef[Str],
     default => sub {{
         AC  => 'Acre',
         AL  => 'Alagoas',
@@ -50,7 +57,9 @@ has states  => (
         TO  => 'Tocantins',
     }}
 );
-has idx_len => (is => 'ro', isa => 'Int', default => sub { length(pack('N*', 1 .. 2)) });
+
+
+has idx_len => (is => 'ro', isa => Int, default => sub { length(pack('N*', 1 .. 2)) });
 
 
 sub BUILD {
@@ -58,6 +67,7 @@ sub BUILD {
 
     $self->csv->column_names([qw(cep_initial cep_final state city ddd lat lon)]);
 
+    ## no critic (RequireBriefOpen)
     open(my $data, '<:encoding(latin1)', dist_file('Geo-CEP', 'cep.csv'))
         or return confess "Error opening CSV: $!";
     $self->data($data);
@@ -71,6 +81,8 @@ sub BUILD {
 
     return confess 'Inconsistent index size' if not $size or ($size % $self->idx_len);
     $self->length($size / $self->idx_len);
+
+    return;
 }
 
 sub DEMOLISH {
@@ -78,7 +90,10 @@ sub DEMOLISH {
 
     close $self->data;
     close $self->index;
+
+    return;
 }
+
 
 sub get_idx {
     my ($self, $n) = @_;
@@ -96,11 +111,14 @@ sub get_idx {
     return $cep;
 }
 
+
 sub bsearch {
     my ($self, $hi, $val) = @_;
     my ($lo, $cep, $mid) = qw(0 0 0);
 
-    return 0 if ($self->get_idx($lo) > $val) or ($self->get_idx($hi) < $val);
+    return 0 if
+        ($self->get_idx($lo) > $val) or
+        ($self->get_idx($hi) < $val);
 
     while ($lo <= $hi) {
         $mid = int(($lo + $hi) / 2);
@@ -114,13 +132,15 @@ sub bsearch {
         }
     }
 
-    return ($cep > $val) ? $self->get_idx($mid - 1) : $cep;
+    return ($cep > $val)
+        ? $self->get_idx($mid - 1)
+        : $cep;
 }
 
 
 sub find {
     my ($self, $cep) = @_;
-    $cep =~ s/\D//g;
+    $cep =~ s/\D//gx;
     if ($self->bsearch($self->length - 1, $cep)) {
         seek($self->data, $self->offset, SEEK_SET) or
             return confess "Can't seek(): $!";
@@ -147,7 +167,8 @@ sub list {
         $row->{state_long} = $self->states->{$row->{state}};
         $list{$row->{city} . '/' . $row->{state}} = $row;
     }
-    $self->csv->eof or $self->csv->error_diag;
+    $self->csv->eof
+        or carp $self->csv->error_diag;
 
     return \%list;
 }
@@ -156,6 +177,7 @@ sub list {
 1;
 
 __END__
+
 =pod
 
 =encoding utf8
@@ -166,7 +188,7 @@ Geo::CEP - Resolve Brazilian city data for a given CEP
 
 =head1 VERSION
 
-version 0.4
+version 0.5
 
 =head1 SYNOPSIS
 
@@ -194,11 +216,29 @@ Obtém os dados como: nome da cidade, do estado, número DDD e latitude/longitud
 Diferentemente do L<WWW::Correios::CEP>, consulta os dados armazenados localmente.
 Por um lado, isso faz L<Geo::CEP> ser extremamente rápido (5 mil consultas por segundo); por outro, somente as informações à nível de cidade são retornadas.
 
+=head1 ATTRIBUTES
+
+=head2 states
+
+Mapeamento de código de estado para o nome do estado (C<AC =E<gt> 'Acre'>).
+
+=head2 idx_len
+
+Tamanho do registro de índice.
+
 =head1 METHODS
 
-=head2 find( CEP )
+=head2 get_idx($n)
 
-Busca por CEP (no formato I<12345678> ou I<"12345-678">) e retorna I<HashRef> com:
+Retorna a posição no arquivo CSV; uso interno.
+
+=head2 bsearch($hi, $val)
+
+Efetua a busca binária (implementação não-recursiva); uso interno.
+
+=head2 find($cep)
+
+Busca por C<$cep> (no formato I<12345678> ou I<"12345-678">) e retorna I<HashRef> com:
 
 =over 4
 
@@ -232,13 +272,8 @@ Retorna I<HashRef> com os dados de todas as cidades.
 
 =for test_synopsis my ($VAR1);
 
-=for Pod::Coverage O_RDONLY
-SEEK_END
-SEEK_SET
-BUILD
+=for Pod::Coverage BUILD
 DEMOLISH
-get_idx
-bsearch
 
 =head1 SEE ALSO
 
@@ -250,7 +285,29 @@ L<cep2city>
 
 =item *
 
+L<Business::BR::CEP>
+
+=item *
+
 L<WWW::Correios::CEP>
+
+=item *
+
+L<WWW::Correios::PrecoPrazo>
+
+=item *
+
+L<WWW::Correios::SRO>
+
+=back
+
+=head1 CONTRIBUTORS
+
+=over 4
+
+=item *
+
+L<Blabos de Blebe|https://metacpan.org/author/BLABOS>
 
 =back
 
@@ -260,10 +317,9 @@ Stanislaw Pusep <stas@sysd.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2011 by Stanislaw Pusep.
+This software is copyright (c) 2013 by Stanislaw Pusep.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-

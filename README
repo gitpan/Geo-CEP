@@ -2,7 +2,7 @@ NAME
     Geo::CEP - Resolve Brazilian city data for a given CEP
 
 VERSION
-    version 0.4
+    version 0.5
 
 SYNOPSIS
         use Data::Dumper;
@@ -32,9 +32,22 @@ DESCRIPTION
     mil consultas por segundo); por outro, somente as informações à nível de
     cidade são retornadas.
 
+ATTRIBUTES
+  states
+    Mapeamento de código de estado para o nome do estado ("AC => 'Acre'").
+
+  idx_len
+    Tamanho do registro de índice.
+
 METHODS
-  find( CEP )
-    Busca por CEP (no formato *12345678* ou *"12345-678"*) e retorna
+  get_idx($n)
+    Retorna a posição no arquivo CSV; uso interno.
+
+  bsearch($hi, $val)
+    Efetua a busca binária (implementação não-recursiva); uso interno.
+
+  find($cep)
+    Busca por $cep (no formato *12345678* ou *"12345-678"*) e retorna
     *HashRef* com:
 
     *   *state*: sigla da Unidade Federativa (SP, RJ, MG);
@@ -56,13 +69,22 @@ METHODS
 SEE ALSO
     *   cep2city
 
+    *   Business::BR::CEP
+
     *   WWW::Correios::CEP
+
+    *   WWW::Correios::PrecoPrazo
+
+    *   WWW::Correios::SRO
+
+CONTRIBUTORS
+    *   Blabos de Blebe <https://metacpan.org/author/BLABOS>
 
 AUTHOR
     Stanislaw Pusep <stas@sysd.org>
 
 COPYRIGHT AND LICENSE
-    This software is copyright (c) 2011 by Stanislaw Pusep.
+    This software is copyright (c) 2013 by Stanislaw Pusep.
 
     This is free software; you can redistribute it and/or modify it under
     the same terms as the Perl 5 programming language system itself.

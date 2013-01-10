@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-BEGIN { require 5.008; }
+use 5.008;
 
 use ExtUtils::MakeMaker 6.30;
 
@@ -11,29 +11,40 @@ install_share dist => "share";
 
 
 my %WriteMakefileArgs = (
-  'ABSTRACT' => 'Resolve Brazilian city data for a given CEP',
-  'AUTHOR' => 'Stanislaw Pusep <stas@sysd.org>',
-  'BUILD_REQUIRES' => {},
-  'CONFIGURE_REQUIRES' => {
-    'ExtUtils::MakeMaker' => '6.30',
-    'File::ShareDir::Install' => '0.03'
+  "ABSTRACT" => "Resolve Brazilian city data for a given CEP",
+  "AUTHOR" => "Stanislaw Pusep <stas\@sysd.org>",
+  "BUILD_REQUIRES" => {
+    "File::Find" => 0,
+    "File::Temp" => 0,
+    "Test::More" => 0
   },
-  'DISTNAME' => 'Geo-CEP',
-  'EXE_FILES' => [
-    'bin/cep2city'
+  "CONFIGURE_REQUIRES" => {
+    "ExtUtils::MakeMaker" => "6.30",
+    "File::ShareDir::Install" => "0.03"
+  },
+  "DISTNAME" => "Geo-CEP",
+  "EXE_FILES" => [
+    "bin/cep2city"
   ],
-  'LICENSE' => 'perl',
-  'NAME' => 'Geo::CEP',
-  'PREREQ_PM' => {
-    'File::ShareDir' => '0',
-    'Moose' => '0',
-    'Pod::Usage' => '0',
-    'Text::CSV' => '0',
-    'common::sense' => '0'
+  "LICENSE" => "perl",
+  "NAME" => "Geo::CEP",
+  "PREREQ_PM" => {
+    "Carp" => 0,
+    "Fcntl" => 0,
+    "File::ShareDir" => 0,
+    "Moo" => 0,
+    "MooX::Types::MooseLike::Base" => 0,
+    "Pod::Usage" => 0,
+    "Text::CSV" => 0,
+    "integer" => 0,
+    "open" => 0,
+    "strict" => 0,
+    "utf8" => 0,
+    "warnings" => 0
   },
-  'VERSION' => '0.4',
-  'test' => {
-    'TESTS' => 't/*.t'
+  "VERSION" => "0.5",
+  "test" => {
+    "TESTS" => "t/*.t"
   }
 );
 
@@ -56,8 +67,10 @@ delete $WriteMakefileArgs{CONFIGURE_REQUIRES}
 
 WriteMakefile(%WriteMakefileArgs);
 
+{
 package
 MY;
 use File::ShareDir::Install qw(postamble);
+}
 
 
