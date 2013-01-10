@@ -35,6 +35,7 @@ my %WriteMakefileArgs = (
     "Moo" => 0,
     "MooX::Types::MooseLike::Base" => 0,
     "Pod::Usage" => 0,
+    "Scalar::Util" => 0,
     "Text::CSV" => 0,
     "integer" => 0,
     "open" => 0,
@@ -42,7 +43,7 @@ my %WriteMakefileArgs = (
     "utf8" => 0,
     "warnings" => 0
   },
-  "VERSION" => "0.5",
+  "VERSION" => "0.6",
   "test" => {
     "TESTS" => "t/*.t"
   }

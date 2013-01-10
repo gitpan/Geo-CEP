@@ -9,7 +9,7 @@ use warnings qw(all);
 
 use open qw(:locale);
 
-our $VERSION = '0.5'; # VERSION
+our $VERSION = '0.6'; # VERSION
 
 use Geo::CEP;
 use Pod::Usage;
@@ -44,7 +44,7 @@ cep2city - Returns city data for a given CEP
 
 =head1 VERSION
 
-version 0.5
+version 0.6
 
 =head1 SYNOPSIS
 

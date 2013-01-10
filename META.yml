@@ -23,6 +23,7 @@ requires:
   Moo: 0
   MooX::Types::MooseLike::Base: 0
   Pod::Usage: 0
+  Scalar::Util: 0
   Text::CSV: 0
   integer: 0
   open: 0
@@ -34,4 +35,4 @@ resources:
   bugtracker: https://github.com/creaktive/Geo-CEP/issues
   homepage: https://github.com/creaktive/Geo-CEP
   repository: git://github.com/creaktive/Geo-CEP.git
-version: 0.5
+version: 0.6

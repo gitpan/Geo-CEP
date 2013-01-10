@@ -2,25 +2,27 @@ NAME
     Geo::CEP - Resolve Brazilian city data for a given CEP
 
 VERSION
-    version 0.5
+    version 0.6
 
 SYNOPSIS
-        use Data::Dumper;
+        use common::sense;
+        use utf8::all;
+
+        use Data::Printer;
         use Geo::CEP;
 
-        my $gc = new Geo::CEP;
-        print Dumper $gc->find("12420-010");
+        my $gc = Geo::CEP->new;
+        p $gc->find("12420-010");
 
-    Produz:
-
-        $VAR1 = {
-                  'state_long' => "S\x{e3}o Paulo",
-                  'city' => 'Pindamonhangaba',
-                  'lat' => '-22.9166667',
-                  'lon' => '-45.4666667',
-                  'ddd' => '12',
-                  'state' => 'SP'
-                };
+        # Saída:
+        # \ {
+        #     city         "Pindamonhangaba",
+        #     ddd          12,
+        #     lat          -22.9166667,
+        #     lon          -45.4666667,
+        #     state        "SP",
+        #     state_long   "São Paulo"
+        # }
 
 DESCRIPTION
     Obtém os dados como: nome da cidade, do estado, número DDD e
@@ -33,6 +35,15 @@ DESCRIPTION
     cidade são retornadas.
 
 ATTRIBUTES
+  data, index
+    *FileHandle* para os respectivos arquivos.
+
+  length
+    Tamanho do índice.
+
+  offset
+    Última posição dentro do CSV; uso interno.
+
   states
     Mapeamento de código de estado para o nome do estado ("AC => 'Acre'").
 

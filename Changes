@@ -1,6 +1,15 @@
 Changelog for Geo-CEP
 
-0.5 2013-01-10T12:58:41
+0.6 2013-01-10T14:20:40
+ [Stanislaw Pusep <creaktive@gmail.com>]
+ - ensure it works on Perl down to v5.8
+
+ - Q&D Unicode test
+
+ - minor refactoring
+
+
+v0.5 2013-01-10T12:58:09
  [Blabos de Blebe <blabos@blabos.org>]
  - Itarana has no accents
 
