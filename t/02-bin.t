@@ -3,8 +3,6 @@ use strict;
 use utf8;
 use warnings qw(all);
 
-use open qw(:locale);
-
 use Test::More tests => 1;
 
 local $/ = undef;

@@ -16,7 +16,8 @@ my %WriteMakefileArgs = (
   "BUILD_REQUIRES" => {
     "File::Find" => 0,
     "File::Temp" => 0,
-    "Test::More" => 0
+    "Test::More" => 0,
+    "open" => 0
   },
   "CONFIGURE_REQUIRES" => {
     "ExtUtils::MakeMaker" => "6.30",
@@ -38,12 +39,11 @@ my %WriteMakefileArgs = (
     "Scalar::Util" => 0,
     "Text::CSV" => 0,
     "integer" => 0,
-    "open" => 0,
     "strict" => 0,
     "utf8" => 0,
     "warnings" => 0
   },
-  "VERSION" => "0.6",
+  "VERSION" => "0.7",
   "test" => {
     "TESTS" => "t/*.t"
   }

@@ -16,7 +16,7 @@ use MooX::Types::MooseLike::Base qw(:all);
 use Scalar::Util qw(looks_like_number);
 use Text::CSV;
 
-our $VERSION = '0.6'; # VERSION
+our $VERSION = '0.7'; # VERSION
 
 has csv     => (is => 'ro', isa => InstanceOf['Text::CSV'], default => sub { Text::CSV->new }, lazy => 1);
 
@@ -167,7 +167,7 @@ sub find {
 
         return \%res;
     } else {
-        return 0;
+        return;
     }
 }
 
@@ -204,7 +204,7 @@ Geo::CEP - Resolve Brazilian city data for a given CEP
 
 =head1 VERSION
 
-version 0.6
+version 0.7
 
 =head1 SYNOPSIS
 
@@ -294,7 +294,7 @@ I<lat>/I<lon>: coordenadas geográficas da cidade (podem estar vazias).
 
 =back
 
-Retorna I<0> quando não foi possível encontrar.
+Retorna C<undef> quando não foi possível encontrar.
 
 =head2 list()
 

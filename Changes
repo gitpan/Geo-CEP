@@ -1,6 +1,15 @@
 Changelog for Geo-CEP
 
-0.6 2013-01-10T14:20:40
+0.7 2013-01-11T02:59:45
+ [Stanislaw Pusep <creaktive@gmail.com>]
+ - nasty locale bug fix (thanks again, Blabos!)
+
+ - find() returns undef on failure
+
+ - ensure STDIO encoding in t/02-bit.t
+
+
+v0.6 2013-01-10T14:20:24
  [Stanislaw Pusep <creaktive@gmail.com>]
  - ensure it works on Perl down to v5.8
 

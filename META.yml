@@ -6,6 +6,7 @@ build_requires:
   File::Find: 0
   File::Temp: 0
   Test::More: 0
+  open: 0
 configure_requires:
   ExtUtils::MakeMaker: 6.30
   File::ShareDir::Install: 0.03
@@ -26,7 +27,6 @@ requires:
   Scalar::Util: 0
   Text::CSV: 0
   integer: 0
-  open: 0
   perl: 5.008
   strict: 0
   utf8: 0
@@ -35,4 +35,4 @@ resources:
   bugtracker: https://github.com/creaktive/Geo-CEP/issues
   homepage: https://github.com/creaktive/Geo-CEP
   repository: git://github.com/creaktive/Geo-CEP.git
-version: 0.6
+version: 0.7

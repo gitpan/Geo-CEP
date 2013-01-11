@@ -2,7 +2,7 @@ NAME
     Geo::CEP - Resolve Brazilian city data for a given CEP
 
 VERSION
-    version 0.6
+    version 0.7
 
 SYNOPSIS
         use common::sense;
@@ -72,7 +72,7 @@ METHODS
 
     *   *lat*/*lon*: coordenadas geográficas da cidade (podem estar vazias).
 
-    Retorna *0* quando não foi possível encontrar.
+    Retorna "undef" quando não foi possível encontrar.
 
   list()
     Retorna *HashRef* com os dados de todas as cidades.
