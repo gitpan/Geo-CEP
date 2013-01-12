@@ -2,7 +2,7 @@ NAME
     Geo::CEP - Resolve Brazilian city data for a given CEP
 
 VERSION
-    version 0.7
+    version 0.8
 
 SYNOPSIS
         use common::sense;
@@ -56,6 +56,9 @@ METHODS
 
   bsearch($hi, $val)
     Efetua a busca binária (implementação não-recursiva); uso interno.
+
+  fetch_row(@extra)
+    Lê e formata o registro a partir do cep.csv; uso interno.
 
   find($cep)
     Busca por $cep (no formato *12345678* ou *"12345-678"*) e retorna

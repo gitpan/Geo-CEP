@@ -9,14 +9,14 @@ use warnings qw(all);
 use integer;
 
 use Carp qw(carp confess);
-use Fcntl qw(SEEK_END SEEK_SET O_RDONLY);
 use File::ShareDir qw(dist_file);
+use IO::File;
 use Moo;
 use MooX::Types::MooseLike::Base qw(:all);
 use Scalar::Util qw(looks_like_number);
 use Text::CSV;
 
-our $VERSION = '0.7'; # VERSION
+our $VERSION = '0.8'; # VERSION
 
 has csv     => (is => 'ro', isa => InstanceOf['Text::CSV'], default => sub { Text::CSV->new }, lazy => 1);
 
@@ -74,16 +74,15 @@ sub BUILD {
 
     $self->csv->column_names([qw(cep_initial cep_final state city ddd lat lon)]);
 
-    ## no critic (RequireBriefOpen)
-    open(my $data, '<:encoding(latin1)', dist_file('Geo-CEP', 'cep.csv'))
-        or confess "Error opening CSV: $!";
+    my $data = IO::File->new(dist_file('Geo-CEP', 'cep.csv'), '<:encoding(latin1)');
+    confess "Error opening CSV: $!" unless defined $data;
     $self->_set_data($data);
 
-    sysopen(my $index, dist_file('Geo-CEP', 'cep.idx'), O_RDONLY)
-        or confess "Error opening index: $!";
+    my $index = IO::File->new(dist_file('Geo-CEP', 'cep.idx'), O_RDONLY);
+    confess "Error opening index: $!" unless defined $index;
     $self->_set_index($index);
 
-    my $size = sysseek($index, 0, SEEK_END)
+    my $size = $index->sysseek(0, SEEK_END)
         or confess "Can't tell(): $!";
 
     confess 'Inconsistent index size'
@@ -97,27 +96,31 @@ sub BUILD {
 sub DEMOLISH {
     my ($self) = @_;
 
-    close $self->data;
-    close $self->index;
+    $self->data->close;
+    $self->index->close;
 
     return;
 }
 
 
+my %cache;
 sub get_idx {
     my ($self, $n) = @_;
 
-    my $buf = '';
-    sysseek($self->index, $n * $self->idx_len, SEEK_SET)
-        or confess "Can't seek(): $!";
+    unless (exists $cache{$n}) {
+        my $buf = '';
+        $self->index->sysseek($n * $self->idx_len, SEEK_SET)
+            or confess "Can't seek(): $!";
 
-    sysread($self->index, $buf, $self->idx_len)
-        or confess "Can't read(): $!";
-    my ($cep, $offset) = unpack('N*', $buf);
+        $self->index->sysread($buf, $self->idx_len)
+            or confess "Can't read(): $!";
 
-    $self->_set_offset($offset);
+        $cache{$n} = [unpack('N*', $buf)];
+    }
 
-    return $cep;
+    return wantarray
+        ? @{$cache{$n}}
+        : $cache{$n}->[0];
 }
 
 
@@ -141,9 +144,33 @@ sub bsearch {
         }
     }
 
-    return ($cep > $val)
-        ? $self->get_idx($mid - 1)
-        : $cep;
+    my $offset;
+    --$mid if $cep > $val;
+    ($cep, $offset) = $self->get_idx($mid);
+
+    $self->_set_offset($offset);
+    return $cep;
+}
+
+
+## no critic (RequireArgUnpacking)
+sub fetch_row {
+    my ($self, @fields) = (@_, qw(state city ddd lat lon));
+
+    no integer;
+
+    my $row = $self->csv->getline_hr($self->data);
+    return if 'HASH' ne ref $row;
+
+    my %res = map {
+        $_ =>
+            looks_like_number($row->{$_})
+                ? 0 + sprintf('%.7f', $row->{$_})
+                : $row->{$_}
+    } @fields;
+    $res{state_long}= $self->states->{$res{state}};
+
+    return \%res;
 }
 
 
@@ -151,21 +178,10 @@ sub find {
     my ($self, $cep) = @_;
     $cep =~ s/\D//gx;
     if ($self->bsearch($self->length - 1, $cep)) {
-        seek($self->data, $self->offset, SEEK_SET) or
+        $self->data->seek($self->offset, SEEK_SET) or
             confess "Can't seek(): $!";
 
-        no integer;
-
-        my $row = $self->csv->getline_hr($self->data);
-        my %res = map {
-            $_ =>
-                looks_like_number($row->{$_})
-                    ? 0 + sprintf('%.7f', $row->{$_})
-                    : $row->{$_}
-        } qw(state city ddd lat lon);
-        $res{state_long}= $self->states->{$res{state}};
-
-        return \%res;
+        return $self->fetch_row;
     } else {
         return;
     }
@@ -175,16 +191,15 @@ sub find {
 sub list {
     my ($self) = @_;
 
-    seek($self->data, 0, SEEK_SET) or
+    $self->data->seek(0, SEEK_SET) or
         confess "Can't seek(): $!";
 
     my %list;
-    while (my $row = $self->csv->getline_hr($self->data)) {
-        $row->{state_long} = $self->states->{$row->{state}};
+    while (my $row = $self->fetch_row(qw(cep_initial cep_final))) {
         $list{$row->{city} . '/' . $row->{state}} = $row;
     }
     $self->csv->eof
-        or carp $self->csv->error_diag;
+        or croak $self->csv->error_diag;
 
     return \%list;
 }
@@ -204,7 +219,7 @@ Geo::CEP - Resolve Brazilian city data for a given CEP
 
 =head1 VERSION
 
-version 0.7
+version 0.8
 
 =head1 SYNOPSIS
 
@@ -265,6 +280,10 @@ Retorna a posição no arquivo CSV; uso interno.
 =head2 bsearch($hi, $val)
 
 Efetua a busca binária (implementação não-recursiva); uso interno.
+
+=head2 fetch_row(@extra)
+
+Lê e formata o registro a partir do F<cep.csv>; uso interno.
 
 =head2 find($cep)
 

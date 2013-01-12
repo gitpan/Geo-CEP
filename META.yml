@@ -6,7 +6,6 @@ build_requires:
   File::Find: 0
   File::Temp: 0
   Test::More: 0
-  open: 0
 configure_requires:
   ExtUtils::MakeMaker: 6.30
   File::ShareDir::Install: 0.03
@@ -17,11 +16,14 @@ meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
   version: 1.4
 name: Geo-CEP
+recommends:
+  Text::CSV_XS: 0
 requires:
   Carp: 0
-  Fcntl: 0
   File::ShareDir: 0
-  Moo: 0
+  IO::File: 0
+  Moo: 1.000007
+  MooX::Types::MooseLike: 0.16
   MooX::Types::MooseLike::Base: 0
   Pod::Usage: 0
   Scalar::Util: 0
@@ -35,4 +37,4 @@ resources:
   bugtracker: https://github.com/creaktive/Geo-CEP/issues
   homepage: https://github.com/creaktive/Geo-CEP
   repository: git://github.com/creaktive/Geo-CEP.git
-version: 0.7
+version: 0.8

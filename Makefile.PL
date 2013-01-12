@@ -16,8 +16,7 @@ my %WriteMakefileArgs = (
   "BUILD_REQUIRES" => {
     "File::Find" => 0,
     "File::Temp" => 0,
-    "Test::More" => 0,
-    "open" => 0
+    "Test::More" => 0
   },
   "CONFIGURE_REQUIRES" => {
     "ExtUtils::MakeMaker" => "6.30",
@@ -31,9 +30,10 @@ my %WriteMakefileArgs = (
   "NAME" => "Geo::CEP",
   "PREREQ_PM" => {
     "Carp" => 0,
-    "Fcntl" => 0,
     "File::ShareDir" => 0,
-    "Moo" => 0,
+    "IO::File" => 0,
+    "Moo" => "1.000007",
+    "MooX::Types::MooseLike" => "0.16",
     "MooX::Types::MooseLike::Base" => 0,
     "Pod::Usage" => 0,
     "Scalar::Util" => 0,
@@ -43,7 +43,7 @@ my %WriteMakefileArgs = (
     "utf8" => 0,
     "warnings" => 0
   },
-  "VERSION" => "0.7",
+  "VERSION" => "0.8",
   "test" => {
     "TESTS" => "t/*.t"
   }

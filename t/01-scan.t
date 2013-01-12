@@ -3,7 +3,6 @@ use strict;
 use utf8;
 use warnings qw(all);
 
-use open qw(:std :utf8);
 use Test::More;
 
 BEGIN {
@@ -11,7 +10,7 @@ BEGIN {
     use_ok('Geo::CEP');
 }
 
-my $gc = new Geo::CEP;
+my $gc = Geo::CEP->new;
 isa_ok($gc, 'Geo::CEP');
 can_ok($gc, qw(find list));
 
@@ -42,14 +41,10 @@ is_deeply(
 );
 
 my $i = 0;
+srand 42;
 while (my ($name, $row) = each %{$list}) {
     my $test = $row->{cep_initial} + int(rand($row->{cep_final} - $row->{cep_initial}));
     delete $row->{$_} for qw(cep_initial cep_final);
-    $row->{$_} =
-        $row->{$_}
-            ? 0 + sprintf('%.7f', $row->{$_})
-            : ''
-        for qw(lat lon);
 
     my $t0      = Benchmark->new;
     my $r       = $gc->find($test);

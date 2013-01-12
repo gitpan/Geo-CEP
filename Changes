@@ -1,6 +1,21 @@
 Changelog for Geo-CEP
 
-0.7 2013-01-11T02:59:45
+0.8 2013-01-12T15:28:47
+ [Stanislaw Pusep <creaktive@gmail.com>]
+ - fixed misplaced eof()
+
+ - 2x speed increase! (thanks Devel::NYTProf ;)
+
+ - memoize get_idx()
+
+ - IO::File interface
+
+ - fetch_row() method added
+
+ - more specific prereqs
+
+
+v0.7 2013-01-11T02:56:16
  [Stanislaw Pusep <creaktive@gmail.com>]
  - nasty locale bug fix (thanks again, Blabos!)
 
