@@ -1,6 +1,13 @@
 Changelog for Geo-CEP
 
-0.8 2013-01-12T15:28:47
+0.9 2013-01-18T14:23:42
+ [Stanislaw Pusep <creaktive@gmail.com>]
+ - removed drunk code
+
+ - refactored for memoization
+
+
+v0.8 2013-01-12T15:21:03
  [Stanislaw Pusep <creaktive@gmail.com>]
  - fixed misplaced eof()
 

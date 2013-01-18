@@ -32,6 +32,7 @@ my %WriteMakefileArgs = (
     "Carp" => 0,
     "File::ShareDir" => 0,
     "IO::File" => 0,
+    "Memoize" => 0,
     "Moo" => "1.000007",
     "MooX::Types::MooseLike" => "0.16",
     "MooX::Types::MooseLike::Base" => 0,
@@ -43,7 +44,7 @@ my %WriteMakefileArgs = (
     "utf8" => 0,
     "warnings" => 0
   },
-  "VERSION" => "0.8",
+  "VERSION" => "0.9",
   "test" => {
     "TESTS" => "t/*.t"
   }

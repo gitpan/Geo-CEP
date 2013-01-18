@@ -10,7 +10,7 @@ configure_requires:
   ExtUtils::MakeMaker: 6.30
   File::ShareDir::Install: 0.03
 dynamic_config: 0
-generated_by: 'Dist::Zilla version 4.300028, CPAN::Meta::Converter version 2.120921'
+generated_by: 'Dist::Zilla version 4.300029, CPAN::Meta::Converter version 2.120921'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -22,6 +22,7 @@ requires:
   Carp: 0
   File::ShareDir: 0
   IO::File: 0
+  Memoize: 0
   Moo: 1.000007
   MooX::Types::MooseLike: 0.16
   MooX::Types::MooseLike::Base: 0
@@ -37,4 +38,4 @@ resources:
   bugtracker: https://github.com/creaktive/Geo-CEP/issues
   homepage: https://github.com/creaktive/Geo-CEP
   repository: git://github.com/creaktive/Geo-CEP.git
-version: 0.8
+version: 0.9

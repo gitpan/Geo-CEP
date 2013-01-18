@@ -8,15 +8,16 @@ use warnings qw(all);
 
 use integer;
 
-use Carp qw(carp confess);
+use Carp qw(carp confess croak);
 use File::ShareDir qw(dist_file);
 use IO::File;
+use Memoize;
 use Moo;
 use MooX::Types::MooseLike::Base qw(:all);
 use Scalar::Util qw(looks_like_number);
 use Text::CSV;
 
-our $VERSION = '0.8'; # VERSION
+our $VERSION = '0.9'; # VERSION
 
 has csv     => (is => 'ro', isa => InstanceOf['Text::CSV'], default => sub { Text::CSV->new }, lazy => 1);
 
@@ -28,45 +29,46 @@ has index   => (is => 'rwp', isa => FileHandle);
 has length  => (is => 'rwp', isa => Int, default => sub { 0 });
 
 
-has offset  => (is => 'rwp', isa => Int, default => sub { 0 });
-
+my %states = (
+    AC  => 'Acre',
+    AL  => 'Alagoas',
+    AM  => 'Amazonas',
+    AP  => 'Amapá',
+    BA  => 'Bahia',
+    CE  => 'Ceará',
+    DF  => 'Distrito Federal',
+    ES  => 'Espírito Santo',
+    GO  => 'Goiás',
+    MA  => 'Maranhão',
+    MG  => 'Minas Gerais',
+    MS  => 'Mato Grosso do Sul',
+    MT  => 'Mato Grosso',
+    PA  => 'Pará',
+    PB  => 'Paraíba',
+    PE  => 'Pernambuco',
+    PI  => 'Piauí',
+    PR  => 'Paraná',
+    RJ  => 'Rio de Janeiro',
+    RN  => 'Rio Grande do Norte',
+    RO  => 'Rondônia',
+    RR  => 'Roraima',
+    RS  => 'Rio Grande do Sul',
+    SC  => 'Santa Catarina',
+    SE  => 'Sergipe',
+    SP  => 'São Paulo',
+    TO  => 'Tocantins',
+);
 
 has states  => (
     is      => 'ro',
     isa     => HashRef[Str],
-    default => sub {{
-        AC  => 'Acre',
-        AL  => 'Alagoas',
-        AM  => 'Amazonas',
-        AP  => 'Amapá',
-        BA  => 'Bahia',
-        CE  => 'Ceará',
-        DF  => 'Distrito Federal',
-        ES  => 'Espírito Santo',
-        GO  => 'Goiás',
-        MA  => 'Maranhão',
-        MG  => 'Minas Gerais',
-        MS  => 'Mato Grosso do Sul',
-        MT  => 'Mato Grosso',
-        PA  => 'Pará',
-        PB  => 'Paraíba',
-        PE  => 'Pernambuco',
-        PI  => 'Piauí',
-        PR  => 'Paraná',
-        RJ  => 'Rio de Janeiro',
-        RN  => 'Rio Grande do Norte',
-        RO  => 'Rondônia',
-        RR  => 'Roraima',
-        RS  => 'Rio Grande do Sul',
-        SC  => 'Santa Catarina',
-        SE  => 'Sergipe',
-        SP  => 'São Paulo',
-        TO  => 'Tocantins',
-    }}
+    default => sub { \%states }
 );
 
 
-has idx_len => (is => 'ro', isa => Int, default => sub { length(pack('N*', 1 .. 2)) });
+my $idx_len = length(pack('N*', 1 .. 2));
+
+has idx_len => (is => 'ro', isa => Int, default => sub { $idx_len });
 
 
 sub BUILD {
@@ -86,55 +88,52 @@ sub BUILD {
         or confess "Can't tell(): $!";
 
     confess 'Inconsistent index size'
-        if not $size or
-        ($size % $self->idx_len);
-    $self->_set_length($size / $self->idx_len);
+        if not $size
+        or $size % $idx_len;
+    $self->_set_length($size / $idx_len);
 
     return;
 }
 
-sub DEMOLISH {
-    my ($self) = @_;
+sub import {
+    my (undef, @args) = @_;
 
-    $self->data->close;
-    $self->index->close;
-
-    return;
-}
-
-
-my %cache;
-sub get_idx {
-    my ($self, $n) = @_;
-
-    unless (exists $cache{$n}) {
-        my $buf = '';
-        $self->index->sysseek($n * $self->idx_len, SEEK_SET)
-            or confess "Can't seek(): $!";
-
-        $self->index->sysread($buf, $self->idx_len)
-            or confess "Can't read(): $!";
-
-        $cache{$n} = [unpack('N*', $buf)];
+    if (grep { $_ eq 'memoize' } @args) {
+        memoize $_
+            for qw(_bsearch _fetch_row _find _get_idx);
     }
 
-    return wantarray
-        ? @{$cache{$n}}
-        : $cache{$n}->[0];
+    return;
+}
+# Retorna o registro no arquivo CSV; uso interno.
+sub _get_idx {
+    my ($self, $n, $want_offset) = @_;
+
+    my $buf = '';
+    $self->index->sysseek($n * $idx_len, SEEK_SET)
+        or confess "Can't seek(): $!";
+
+    $self->index->sysread($buf, $idx_len)
+        or confess "Can't read(): $!";
+
+    my ($cep, $offset) = unpack 'N*' => $buf;
+    return defined $want_offset
+        ? $offset
+        : $cep;
 }
 
-
-sub bsearch {
+# Efetua a busca binária (implementação não-recursiva); uso interno.
+sub _bsearch {
     my ($self, $hi, $val) = @_;
     my ($lo, $cep, $mid) = qw(0 0 0);
 
-    return 0 if
-        ($self->get_idx($lo) > $val) or
-        ($self->get_idx($hi) < $val);
+    return
+        if ($self->_get_idx($lo) > $val)
+        or ($self->_get_idx($hi) < $val);
 
     while ($lo <= $hi) {
-        $mid = int(($lo + $hi) / 2);
-        $cep = $self->get_idx($mid);
+        $mid = ($lo + $hi) / 2;
+        $cep = $self->_get_idx($mid);
         if ($val < $cep) {
             $hi = $mid - 1;
         } elsif ($val > $cep) {
@@ -144,59 +143,67 @@ sub bsearch {
         }
     }
 
-    my $offset;
     --$mid if $cep > $val;
-    ($cep, $offset) = $self->get_idx($mid);
-
-    $self->_set_offset($offset);
-    return $cep;
+    return $self->_get_idx($mid, 1);
 }
 
 
-## no critic (RequireArgUnpacking)
-sub fetch_row {
-    my ($self, @fields) = (@_, qw(state city ddd lat lon));
+# Lê e formata o registro a partir do cep.csv; uso interno.
+sub _fetch_row {
+    my ($self, $offset) = @_;
 
     no integer;
 
+    $self->data->seek($offset, SEEK_SET)
+        or confess "Can't seek(): $!";
+
     my $row = $self->csv->getline_hr($self->data);
-    return if 'HASH' ne ref $row;
+    return
+        if 'HASH' ne ref $row
+        or not defined $row->{state};
 
     my %res = map {
         $_ =>
             looks_like_number($row->{$_})
                 ? 0 + sprintf('%.7f', $row->{$_})
                 : $row->{$_}
-    } @fields;
-    $res{state_long}= $self->states->{$res{state}};
+    } qw(state city ddd lat lon cep_initial cep_final);
+    $res{state_long}= $states{$res{state}};
 
     return \%res;
 }
 
 
-sub find {
+sub _find {
     my ($self, $cep) = @_;
-    $cep =~ s/\D//gx;
-    if ($self->bsearch($self->length - 1, $cep)) {
-        $self->data->seek($self->offset, SEEK_SET) or
-            confess "Can't seek(): $!";
-
-        return $self->fetch_row;
+    my $offset = $self->_bsearch($self->length - 1, $cep);
+    if (defined $offset) {
+        return $self->_fetch_row($offset);
     } else {
         return;
     }
+}
+
+sub find {
+    my ($self, $cep) = @_;
+    $cep =~ s/\D//gsx;
+    return $self->_find(substr($cep, 0, 8));
 }
 
 
 sub list {
     my ($self) = @_;
 
-    $self->data->seek(0, SEEK_SET) or
-        confess "Can't seek(): $!";
+    $self->index->sysseek(0, SEEK_SET)
+        or confess "Can't seek(): $!";
 
     my %list;
-    while (my $row = $self->fetch_row(qw(cep_initial cep_final))) {
-        $list{$row->{city} . '/' . $row->{state}} = $row;
+    my $buf;
+    while ($self->index->sysread($buf, $idx_len)) {
+        my (undef, $offset) = unpack 'N*' => $buf;
+        my $row = $self->_fetch_row($offset);
+        $list{$row->{city} . '/' . $row->{state}} = $row
+            if defined $row;
     }
     $self->csv->eof
         or croak $self->csv->error_diag;
@@ -219,7 +226,7 @@ Geo::CEP - Resolve Brazilian city data for a given CEP
 
 =head1 VERSION
 
-version 0.8
+version 0.9
 
 =head1 SYNOPSIS
 
@@ -227,13 +234,18 @@ version 0.8
     use utf8::all;
 
     use Data::Printer;
-    use Geo::CEP;
+
+    # 'memoize' é extremamente vantajoso em casos aonde a mesma
+    # instância é utilizada para resolver lotes grandes de CEPs
+    use Geo::CEP qw(memoize);
 
     my $gc = Geo::CEP->new;
     p $gc->find("12420-010");
 
     # Saída:
     # \ {
+    #     cep_final    12449999
+    #     cep_initial  12400000
     #     city         "Pindamonhangaba",
     #     ddd          12,
     #     lat          -22.9166667,
@@ -259,10 +271,6 @@ I<FileHandle> para os respectivos arquivos.
 
 Tamanho do índice.
 
-=head2 offset
-
-Última posição dentro do CSV; uso interno.
-
 =head2 states
 
 Mapeamento de código de estado para o nome do estado (C<AC =E<gt> 'Acre'>).
@@ -273,23 +281,19 @@ Tamanho do registro de índice.
 
 =head1 METHODS
 
-=head2 get_idx($n)
-
-Retorna a posição no arquivo CSV; uso interno.
-
-=head2 bsearch($hi, $val)
-
-Efetua a busca binária (implementação não-recursiva); uso interno.
-
-=head2 fetch_row(@extra)
-
-Lê e formata o registro a partir do F<cep.csv>; uso interno.
-
 =head2 find($cep)
 
 Busca por C<$cep> (no formato I<12345678> ou I<"12345-678">) e retorna I<HashRef> com:
 
 =over 4
+
+=item *
+
+I<cep_initial>: o início da faixa de CEPs da cidade;
+
+=item *
+
+I<cep_final>: o término da faixa de CEP da cidade;
 
 =item *
 
@@ -327,7 +331,7 @@ Retorna I<HashRef> com os dados de todas as cidades.
 =end test_synopsis
 
 =for Pod::Coverage BUILD
-DEMOLISH
+import
 
 =head1 SEE ALSO
 

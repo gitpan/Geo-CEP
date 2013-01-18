@@ -7,7 +7,7 @@ use strict;
 use utf8;
 use warnings qw(all);
 
-our $VERSION = '0.8'; # VERSION
+our $VERSION = '0.9'; # VERSION
 
 use Geo::CEP;
 use Pod::Usage;
@@ -42,7 +42,7 @@ cep2city - Returns city data for a given CEP
 
 =head1 VERSION
 
-version 0.8
+version 0.9
 
 =head1 SYNOPSIS
 

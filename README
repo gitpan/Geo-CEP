@@ -2,20 +2,25 @@ NAME
     Geo::CEP - Resolve Brazilian city data for a given CEP
 
 VERSION
-    version 0.8
+    version 0.9
 
 SYNOPSIS
         use common::sense;
         use utf8::all;
 
         use Data::Printer;
-        use Geo::CEP;
+
+        # 'memoize' é extremamente vantajoso em casos aonde a mesma
+        # instância é utilizada para resolver lotes grandes de CEPs
+        use Geo::CEP qw(memoize);
 
         my $gc = Geo::CEP->new;
         p $gc->find("12420-010");
 
         # Saída:
         # \ {
+        #     cep_final    12449999
+        #     cep_initial  12400000
         #     city         "Pindamonhangaba",
         #     ddd          12,
         #     lat          -22.9166667,
@@ -41,9 +46,6 @@ ATTRIBUTES
   length
     Tamanho do índice.
 
-  offset
-    Última posição dentro do CSV; uso interno.
-
   states
     Mapeamento de código de estado para o nome do estado ("AC => 'Acre'").
 
@@ -51,18 +53,13 @@ ATTRIBUTES
     Tamanho do registro de índice.
 
 METHODS
-  get_idx($n)
-    Retorna a posição no arquivo CSV; uso interno.
-
-  bsearch($hi, $val)
-    Efetua a busca binária (implementação não-recursiva); uso interno.
-
-  fetch_row(@extra)
-    Lê e formata o registro a partir do cep.csv; uso interno.
-
   find($cep)
     Busca por $cep (no formato *12345678* ou *"12345-678"*) e retorna
     *HashRef* com:
+
+    *   *cep_initial*: o início da faixa de CEPs da cidade;
+
+    *   *cep_final*: o término da faixa de CEP da cidade;
 
     *   *state*: sigla da Unidade Federativa (SP, RJ, MG);
 
